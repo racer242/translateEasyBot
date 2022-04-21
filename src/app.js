@@ -1,19 +1,30 @@
-import express, { json } from 'express';
-import items from './items';
+import express from "express";
+import createError from "http-errors";
+import logger from "morgan";
+
+import path from "path";
 
 const app = express();
 
+app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.use(json())
+app.use(express.static(path.join(__dirname, "public")));
 
-const PORT = process.env.PORT || 3000;
-
-app.get('/', async (req, res) => {
-    res.json({ status: true, message: "Our node.js app works" })
+app.get("/", async (req, res) => {
+  res.json({ status: true, message: "Our node.js app works" });
 });
 
-app.get('/items', (req, res) => {
-    res.json({ status: true, message: "Fetched all items", data: items })
-})
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  next(createError(404));
+});
 
-app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
+// error handler //, next
+app.use(function (err, req, res) {
+  res.status(err.status || 500);
+  res.end(err.message);
+});
+
+export default app;

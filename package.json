@@ -7,13 +7,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf dist && babel src --out-dir dist  --copy-files",
     "start": "node dist/app.js",
-    "start:dev": "nodemon --exec babel-node src/app.js"
+    "start:dev": "nodemon --exec babel-node bin/www.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GeekyGeeky/es6_setup_node.git"
+    "url": "git+https://github.com/racer242/translateEasyBot.git"
   },
   "keywords": [
+    "telegram",
     "babel",
     "node.js",
     "javascript",
@@ -25,6 +28,14 @@
     "url": "https://github.com/GeekyGeeky/es6_setup_node/issues"
   },
   "homepage": "https://github.com/GeekyGeeky/es6_setup_node#readme",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.2",
+    "http-errors": "^2.0.0",
+    "morgan": "^1.10.0",
+    "telegraf": "^4.7.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.5",
@@ -32,10 +43,18 @@
     "@babel/plugin-proposal-class-properties": "^7.16.5",
     "@babel/plugin-proposal-object-rest-spread": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
+    "eslint": "^8.13.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-html": "^6.2.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^26.1.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-security": "^1.5.0",
+    "jest": "^27.5.1",
     "nodemon": "^2.0.15",
+    "prettier": "^2.6.2",
     "rimraf": "^3.0.2"
-  },
-  "dependencies": {
-    "express": "^4.17.2"
   }
 }
