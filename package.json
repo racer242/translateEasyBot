@@ -4,7 +4,7 @@
   "description": "A simple ES6 setup for node applications",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest -i --colors --verbose --detectOpenHandles",
     "build": "rimraf dist && babel src --out-dir dist  --copy-files",
     "start": "node dist/app.js",
     "start:dev": "nodemon --exec babel-node bin/www.js",
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/GeekyGeeky/es6_setup_node#readme",
   "dependencies": {
+    "@iamtraction/google-translate": "^1.1.2",
     "debug": "^4.3.4",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
