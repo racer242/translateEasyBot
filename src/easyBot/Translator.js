@@ -1,6 +1,10 @@
 import translate from "@iamtraction/google-translate";
 
 class Translator {
+  langFrom;
+
+  langTo;
+
   constructor(langFrom = null, langTo = "en") {
     this.langFrom = langFrom;
     this.langTo = langTo;
@@ -18,7 +22,7 @@ class Translator {
       let langCorrected = null;
       let textCorrected = null;
 
-      if (result.from.language.didYouMean) {
+      if (result?.from?.language?.didYouMean) {
         langCorrected = result.from.language.iso;
       }
 
