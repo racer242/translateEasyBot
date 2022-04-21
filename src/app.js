@@ -16,7 +16,7 @@ app.get("/", async (req, res) => {
   res.json({ status: true, message: "Our node.js app works" });
 });
 
-// catch 404 and forward to error handler
+// catch 404 and forward to error   handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
