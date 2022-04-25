@@ -5,8 +5,33 @@ import logger from "morgan";
 import path from "path";
 
 import Translator from "./easyBot/Translator";
+import TelegramBot from "./easyBot/TelegramBot";
 
 const translator = new Translator();
+const telegramBot = new TelegramBot();
+
+telegramBot.init({
+  onMessage: async (message, from, to) => {
+    translator.setFrom(from);
+    translator.setTo(to);
+    let { translation, langCorrected, textCorrected } = await translator.run(
+      message
+    );
+    console.log(`from ${translator.langFrom} to ${translator.langTo}`);
+    console.log(translation);
+    console.log(`corrected: lang=${langCorrected} text=${textCorrected}`);
+    return translation;
+  },
+  // onSetTo: async (lang) => {
+  //   translator.setTo(lang);
+  //   return translator.langTo;
+  // },
+  // onSetFrom: async (lang) => {
+  //   translator.setFrom(lang);
+  //   return translator.langFrom;
+  // },
+});
+telegramBot.start();
 
 const app = express();
 

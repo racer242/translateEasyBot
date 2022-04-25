@@ -35,7 +35,9 @@
     "express": "^4.17.2",
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",
-    "telegraf": "^4.7.0"
+    "telegraf": "^4.7.0",
+    "telegraf-cmd-args": "^1.0.2",
+    "telegraf-i18n": "^6.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.16.0",
