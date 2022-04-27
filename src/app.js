@@ -20,7 +20,7 @@ telegramBot.init({
     console.log(`from ${translator.langFrom} to ${translator.langTo}`);
     console.log(translation);
     console.log(`corrected: lang=${langCorrected} text=${textCorrected}`);
-    return translation;
+    return { translation, langCorrected, textCorrected };
   },
   // onSetTo: async (lang) => {
   //   translator.setTo(lang);

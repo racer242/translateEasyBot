@@ -46,7 +46,6 @@ class Translator {
       if (result?.from?.text?.didYouMean) {
         textCorrected = result.from.text.value;
       }
-
       if (!langFrom && langCorrected) {
         langFrom = langCorrected;
         result = await translate(phrase, {

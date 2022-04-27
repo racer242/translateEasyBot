@@ -1,4 +1,4 @@
-import { Telegraf, session } from "telegraf";
+import { Telegraf, session, Markup } from "telegraf"; // , Extra
 import TelegrafI18n from "telegraf-i18n";
 import commandMiddleware from "telegraf-cmd-args";
 import locales from "../configuration/locales";
@@ -10,40 +10,107 @@ import locales from "../configuration/locales";
 class TelegramBot {
   bot;
 
+  defaultLocale;
+
   constructor() {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
     process.once("SIGINT", () => this.stop("SIGINT"));
     process.once("SIGTERM", () => this.stop("SIGTERM"));
   }
 
+  initCtx(ctx) {
+    ctx.session ??= { to: this.defaultLocale, from: null };
+  }
+
+  async translate(ctx, text, from, to) {
+    if (this.params?.onMessage) {
+      let result = await this.params.onMessage(text, from, to);
+      return result;
+    }
+    throw new Error(
+      "Bot's onMessage callback isn't set. Define it in init params"
+    );
+  }
+
+  getLangMenu(ctx, direction) {
+    let languages = (locales[ctx.i18n.locale()] ?? locales[this.defaultLocale])
+      .lang;
+    delete languages.unknown;
+    let langs = Object.entries(languages).map(([key, value]) => {
+      return [`${direction} ${value} (${key})`];
+    });
+    return langs;
+  }
+
+  async switchTo(ctx, to) {
+    let message = `${locales[this.defaultLocale].toSet} ${
+      locales[this.defaultLocale].lang[to]
+    }`;
+    let { translation } = await this.translate(
+      ctx,
+      message,
+      this.defaultLocale,
+      to
+    );
+    if (translation) {
+      ctx.session.to = to;
+      if (this.params?.onSetTo) {
+        await this.params.onSetTo(to);
+      }
+      ctx.reply(translation, Markup.removeKeyboard());
+    } else {
+      ctx.reply(
+        `${ctx.i18n.t("unknown")} ${locales[this.defaultLocale].lang[to]}`,
+        Markup.removeKeyboard()
+      );
+    }
+  }
+
+  async switchFrom(ctx, from) {
+    let message = `${locales[this.defaultLocale].fromSet} ${
+      locales[this.defaultLocale].lang[from]
+    }`;
+    let { translation } = await this.translate(
+      ctx,
+      message,
+      this.defaultLocale,
+      from
+    );
+    if (translation) {
+      ctx.session.from = from;
+      if (this.params?.onSetFrom) {
+        await this.params.onSetFrom(from);
+      }
+      ctx.reply(translation, Markup.removeKeyboard());
+    } else {
+      ctx.reply(
+        `${ctx.i18n.t("unknown")} ${locales[this.defaultLocale].lang[from]}`,
+        Markup.removeKeyboard()
+      );
+    }
+  }
+
   init(params) {
     this.params = params;
+    [this.defaultLocale] = Object.entries(locales).find(
+      ([, value]) => value.isDefault
+    );
     this.i18n = new TelegrafI18n({
-      defaultLanguage: Object.entries(locales).find(
-        ([, value]) => value.isDefault
-      ),
+      defaultLanguage: this.defaultLocale,
       allowMissing: false,
     });
 
-    Object.entries(locales).forEach(([key, value]) => {
+    let cloneLocales = structuredClone(locales);
+
+    Object.entries(cloneLocales).forEach(([key, value]) => {
       this.i18n.loadLocale(key, value);
     });
 
-    const initCtx = (ctx) => {
-      ctx.session ??= { to: "en", from: null };
-    };
-
-    const translate = async (ctx, text, from, to) => {
-      if (params?.onMessage) {
-        let result = await params.onMessage(text, from, to);
-        return result;
-      }
-      throw new Error(
-        "Bot's onMessage callback isn't set. Define it in init params"
-      );
-    };
-
     this.bot.use(session());
+    this.bot.use((ctx, next) => {
+      this.initCtx(ctx);
+      next();
+    });
     this.bot.use(this.i18n.middleware());
     this.bot.use(commandMiddleware);
 
@@ -56,53 +123,96 @@ class TelegramBot {
     });
 
     this.bot.help((ctx) => {
-      ctx.reply(ctx.i18n.t("help"));
+      ctx.reply(
+        ctx.i18n.t("help"),
+        Markup.inlineKeyboard([
+          Markup.button.callback(
+            ctx.i18n.t("selectToLangButton") +
+              (ctx.session.to ? ` (${ctx.session.to})` : ""),
+            "selectToLang"
+          ),
+          Markup.button.callback(
+            ctx.i18n.t("selectFromLangButton") +
+              (ctx.session.from ? ` (${ctx.session.from})` : ""),
+            "selectFromLang"
+          ),
+        ])
+      );
     });
 
-    this.bot.command("to", async (ctx) => {
-      initCtx(ctx);
+    this.bot.command("to", (ctx) => {
       let to = ctx.state.command?.splitArgs[0];
-      let message = `${ctx.i18n.t("toSet")} ${to}`;
-      let translated = await translate(ctx, message, ctx.session.from, to);
-      if (translated) {
-        ctx.session.to = to;
-        if (params?.onSetTo) {
-          await params.onSetTo(to);
-        }
-        ctx.reply(translated);
-      } else {
-        ctx.reply(`${ctx.i18n.t("unknown")} ${to}`);
-      }
+      return this.switchTo(ctx, to);
     });
 
-    this.bot.command("from", async (ctx) => {
-      initCtx(ctx);
+    this.bot.command("from", (ctx) => {
       let from = ctx.state.command?.splitArgs[0];
-      let message = `${ctx.i18n.t("fromSet")} ${from}`;
-      let translated = await translate(ctx, message, from, ctx.session.to);
-      if (translated) {
-        ctx.session.from = from;
-        if (params?.onSetFrom) {
-          await params.onSetFrom(from);
-        }
-        ctx.reply(translated);
-      } else {
-        ctx.reply(`${ctx.i18n.t("unknown")} ${from}`);
+      return this.switchFrom(ctx, from);
+    });
+
+    this.bot.command("lang", async (ctx) => {
+      ctx.reply(
+        ctx.i18n.t("selectToLangButton"),
+        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
+          .oneTime()
+          .resize()
+      );
+    });
+
+    this.bot.action("selectToLang", async (ctx) => {
+      ctx.reply(
+        ctx.i18n.t("selectToLang"),
+        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
+          .oneTime()
+          .resize()
+      );
+    });
+
+    this.bot.action("selectFromLang", async (ctx) => {
+      ctx.reply(
+        ctx.i18n.t("selectFromLang"),
+        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("from")))
+          .oneTime()
+          .resize()
+      );
+    });
+
+    this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
+      let direction = ctx.match[1];
+      let lang = ctx.match[2];
+      if (direction === ctx.i18n.t("from")) {
+        return this.switchFrom(ctx, lang);
       }
+      return this.switchTo(ctx, lang);
     });
 
     this.bot.hears(/(.+)/, async (ctx) => {
-      initCtx(ctx);
-      let translated = await translate(
+      let { translation, langCorrected, textCorrected } = await this.translate(
         ctx,
         ctx.message.text,
         ctx.session.from,
         ctx.session.to
       );
-      if (translated) {
-        ctx.reply(translated);
+      if (translation) {
+        await ctx.reply(translation);
       } else {
-        ctx.reply(ctx.i18n.t("noTranslate"));
+        await ctx.reply(ctx.i18n.t("noTranslate"));
+      }
+      if (langCorrected) {
+        await ctx.reply(
+          `${ctx.i18n.t("langCorrected")} ${ctx.i18n.t(
+            `lang.${langCorrected}`
+          )}`,
+          Markup.inlineKeyboard([
+            Markup.button.callback(
+              ctx.i18n.t("selectFromLangButton"),
+              "selectFromLang"
+            ),
+          ])
+        );
+      }
+      if (textCorrected) {
+        await ctx.reply(`${ctx.i18n.t("textCorrected")} ${textCorrected}`);
       }
     });
   }
