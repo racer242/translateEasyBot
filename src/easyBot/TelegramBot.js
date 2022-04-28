@@ -250,7 +250,7 @@ class TelegramBot {
   }
 
   async startSSLProdMode() {
-    console.log("Starting a bot in production mode with SSL ");
+    console.log("Starting a bot in production mode with SSL");
 
     const tlsOptions = {
       key: fs.readFileSync("/credentials/server-key.pem"),

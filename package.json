@@ -9,7 +9,8 @@
     "start": "node dist/app.js",
     "start:dev": "nodemon --exec babel-node bin/www.js",
     "lint": "eslint .",
-    "lint:fix": "eslint ./src --fix --color"
+    "lint:fix": "eslint ./src --fix --color",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
