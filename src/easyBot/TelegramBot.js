@@ -1,8 +1,9 @@
-import { Telegraf, session, Markup } from "telegraf"; // , Extra
+import { Telegraf, session, Markup, Telegram } from "telegraf"; // , Extra
 import TelegrafI18n from "telegraf-i18n";
 import commandMiddleware from "telegraf-cmd-args";
+import axios from "axios";
+import fs from "fs";
 import locales from "../configuration/locales";
-
 /**
  * [TelegramBot description]
  *
@@ -177,6 +178,11 @@ class TelegramBot {
       );
     });
 
+    this.bot.action(/changeFromLang (.+)/, async (ctx) => {
+      let lang = ctx.match[1];
+      this.switchFrom(ctx, lang);
+    });
+
     this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
       let direction = ctx.match[1];
       let lang = ctx.match[2];
@@ -202,11 +208,14 @@ class TelegramBot {
         await ctx.reply(
           `${ctx.i18n.t("langCorrected")} ${ctx.i18n.t(
             `lang.${langCorrected}`
-          )}`,
+          )}`
+        );
+        await ctx.reply(
+          ctx.i18n.t("changeProposal"),
           Markup.inlineKeyboard([
             Markup.button.callback(
-              ctx.i18n.t("selectFromLangButton"),
-              "selectFromLang"
+              ctx.i18n.t("changeFromLangButton"),
+              `changeFromLang ${langCorrected}`
             ),
           ])
         );
@@ -217,8 +226,65 @@ class TelegramBot {
     });
   }
 
+  startDevMode() {
+    console.log("Starting a bot in development mode");
+
+    axios
+      .get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/deleteWebhook`)
+      .then(() => {
+        this.bot.launch();
+      });
+  }
+
+  async startProdMode() {
+    console.log("Starting a bot in production mode without SSL");
+
+    await this.bot.telegram.setWebhook(
+      `${process.env.SERVER_URL}:${process.env.PORT}/${process.env.SECRET_URL}`
+    );
+
+    await this.bot.startWebhook(process.env.SECRET_URL, null, process.env.PORT);
+
+    const webhookStatus = await Telegram.getWebhookInfo();
+    console.log("Webhook status", webhookStatus);
+  }
+
+  async startSSLProdMode() {
+    console.log("Starting a bot in production mode with SSL");
+
+    const tlsOptions = {
+      key: fs.readFileSync("/credentials/server-key.pem"),
+      cert: fs.readFileSync("/credentials/server-cert.pem"),
+    };
+
+    await this.bot.telegram.setWebhook(
+      `${process.env.SERVER_URL}:${process.env.PORT}/${process.env.SECRET_URL}`
+    );
+
+    await this.bot.startWebhook(
+      process.env.SECRET_URL,
+      tlsOptions,
+      process.env.PORT
+    );
+
+    const webhookStatus = await Telegram.getWebhookInfo();
+    console.log("Webhook status", webhookStatus);
+  }
+
   start() {
-    this.bot.launch();
+    if (process.env.NODE_ENV === "production") {
+      if (process.env.USE_SSL) {
+        this.startSSLProdMode();
+      } else {
+        this.startProdMode();
+      }
+    } else {
+      this.startDevMode();
+    }
+  }
+
+  webhookCallback() {
+    return this.bot.webhookCallback(process.env.PROD_SECRET_SERVER_URL);
   }
 }
 

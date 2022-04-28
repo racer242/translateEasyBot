@@ -41,6 +41,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(telegramBot.webhookCallback());
+
 app.get("/setup/to/:langTo", async (req, res) => {
   translator.setTo(req.params.langTo);
   res.json({
