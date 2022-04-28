@@ -15,11 +15,11 @@ class TelegramBot {
 
   constructor() {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
-    process.once("SIGINT", () => this.stop("SIGINT"));
-    process.once("SIGTERM", () => this.stop("SIGTERM"));
+    process.once("SIGINT", () => this.bot.stop("SIGINT"));
+    process.once("SIGTERM", () => this.bot.stop("SIGTERM"));
   }
 
-  initCtx(ctx) {
+  async initCtx(ctx) {
     ctx.session ??= { to: this.defaultLocale, from: null };
   }
 
@@ -40,10 +40,41 @@ class TelegramBot {
     let langs = Object.entries(languages).map(([key, value]) => {
       return [`${direction} ${value} (${key})`];
     });
+    langs.splice(0, 0, [ctx.i18n.t("cancel")]);
     return langs;
   }
 
+  setCommandsMenu(ctx) {
+    this.bot.telegram.setMyCommands([
+      { command: "/to", description: ctx.i18n.t("commands.to") },
+      { command: "/from", description: ctx.i18n.t("commands.from") },
+      {
+        command: `/tomy`,
+        description: ctx.i18n.t("commands.toLang"),
+      },
+      {
+        command: `/frommy`,
+        description: ctx.i18n.t("commands.fromLang"),
+      },
+      {
+        command: `/swap`,
+        description: ctx.i18n.t("commands.swap"),
+      },
+      { command: "/lang", description: ctx.i18n.t("commands.lang") },
+      { command: "/help", description: ctx.i18n.t("commands.help") },
+    ]);
+  }
+
   async switchTo(ctx, to) {
+    if (!to) {
+      ctx.reply(
+        ctx.i18n.t("selectToLangButton"),
+        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
+          .oneTime()
+          .resize()
+      );
+      return;
+    }
     let message = `${locales[this.defaultLocale].toSet} ${
       locales[this.defaultLocale].lang[to]
     }`;
@@ -68,6 +99,15 @@ class TelegramBot {
   }
 
   async switchFrom(ctx, from) {
+    if (!from) {
+      ctx.reply(
+        ctx.i18n.t("selectFromLangButton"),
+        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("from")))
+          .oneTime()
+          .resize()
+      );
+      return;
+    }
     let message = `${locales[this.defaultLocale].fromSet} ${
       locales[this.defaultLocale].lang[from]
     }`;
@@ -107,15 +147,17 @@ class TelegramBot {
       this.i18n.loadLocale(key, value);
     });
 
+    this.bot.use(Telegraf.log());
     this.bot.use(session());
+    this.bot.use(this.i18n.middleware());
+    this.bot.use(commandMiddleware);
     this.bot.use((ctx, next) => {
       this.initCtx(ctx);
       next();
     });
-    this.bot.use(this.i18n.middleware());
-    this.bot.use(commandMiddleware);
 
     this.bot.start((ctx) => {
+      this.setCommandsMenu(ctx);
       ctx.reply(
         ctx.i18n.t("start", {
           username: ctx.from.username,
@@ -124,7 +166,8 @@ class TelegramBot {
     });
 
     this.bot.help((ctx) => {
-      ctx.reply(
+      this.setCommandsMenu(ctx);
+      ctx.replyWithHTML(
         ctx.i18n.t("help"),
         Markup.inlineKeyboard([
           Markup.button.callback(
@@ -143,12 +186,29 @@ class TelegramBot {
 
     this.bot.command("to", (ctx) => {
       let to = ctx.state.command?.splitArgs[0];
-      return this.switchTo(ctx, to);
+      this.switchTo(ctx, to);
     });
 
     this.bot.command("from", (ctx) => {
       let from = ctx.state.command?.splitArgs[0];
-      return this.switchFrom(ctx, from);
+      this.switchFrom(ctx, from);
+    });
+
+    this.bot.command("tomy", (ctx) => {
+      let to = ctx.i18n.locale();
+      this.switchTo(ctx, to);
+    });
+
+    this.bot.command("frommy", (ctx) => {
+      let from = ctx.i18n.locale();
+      this.switchFrom(ctx, from);
+    });
+
+    this.bot.command("swap", async (ctx) => {
+      let to = ctx.session.from ?? ctx.i18n.locale();
+      let from = ctx.session.to ?? ctx.i18n.locale();
+      await this.switchTo(ctx, to);
+      await this.switchFrom(ctx, from);
     });
 
     this.bot.command("lang", async (ctx) => {
@@ -190,6 +250,10 @@ class TelegramBot {
         return this.switchFrom(ctx, lang);
       }
       return this.switchTo(ctx, lang);
+    });
+
+    this.bot.hears(/✖️ .+/, async (ctx) => {
+      ctx.reply(ctx.i18n.t("canceled"), Markup.removeKeyboard());
     });
 
     this.bot.hears(/(.+)/, async (ctx) => {
@@ -239,11 +303,12 @@ class TelegramBot {
   async startProdMode() {
     console.log("Starting a bot in production mode without SSL");
 
-    await this.bot.telegram.setWebhook(
-      `${process.env.SERVER_URL}:${process.env.PORT}/${process.env.SECRET_URL}`
-    );
-
-    await this.bot.startWebhook(process.env.SECRET_URL, null, process.env.PORT);
+    this.bot.launch({
+      webhook: {
+        domain: process.env.SERVER_URL,
+        port: process.env.PORT,
+      },
+    });
 
     const webhookStatus = await Telegram.getWebhookInfo();
     console.log("Webhook status", webhookStatus);
