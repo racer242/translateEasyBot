@@ -25,6 +25,7 @@
     "jest/expect-expect": "off",
     "security/detect-object-injection": "off",
     "import/no-unresolved": [2, { "caseSensitive": false }],
-    "prefer-const": "off"
+    "prefer-const": "off",
+    "class-methods-use-this": "off"
   }
 }

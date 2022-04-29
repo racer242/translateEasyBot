@@ -1,4 +1,4 @@
-import { Telegraf, session, Markup, Telegram } from "telegraf"; // , Extra
+import { Telegraf, session, Telegram } from "telegraf"; // , Extra
 import TelegrafI18n from "telegraf-i18n";
 import commandMiddleware from "telegraf-cmd-args";
 import axios from "axios";
@@ -19,123 +19,35 @@ class TelegramBot {
     process.once("SIGTERM", () => this.bot.stop("SIGTERM"));
   }
 
+  /**
+   */
   async initCtx(ctx) {
-    ctx.session ??= { to: this.defaultLocale, from: null };
+    ctx.session ??= {};
   }
 
-  async translate(ctx, text, from, to) {
-    if (this.params?.onMessage) {
-      let result = await this.params.onMessage(text, from, to);
-      return result;
-    }
-    throw new Error(
-      "Bot's onMessage callback isn't set. Define it in init params"
-    );
+  /**
+   */
+  async getCommandsMenu(ctx) {
+    return ctx ? [] : null;
   }
 
-  getLangMenu(ctx, direction) {
-    let languages = (locales[ctx.i18n.locale()] ?? locales[this.defaultLocale])
-      .lang;
-    delete languages.unknown;
-    let langs = Object.entries(languages).map(([key, value]) => {
-      return [`${direction} ${value} (${key})`];
-    });
-    langs.splice(0, 0, [ctx.i18n.t("cancel")]);
-    return langs;
+  async setCommandsMenu(ctx) {
+    this.bot.telegram.setMyCommands(await this.getCommandsMenu(ctx));
   }
 
-  setCommandsMenu(ctx) {
-    this.bot.telegram.setMyCommands([
-      { command: "/to", description: ctx.i18n.t("commands.to") },
-      { command: "/from", description: ctx.i18n.t("commands.from") },
-      {
-        command: `/tomy`,
-        description: ctx.i18n.t("commands.toLang"),
-      },
-      {
-        command: `/frommy`,
-        description: ctx.i18n.t("commands.fromLang"),
-      },
-      {
-        command: `/swap`,
-        description: ctx.i18n.t("commands.swap"),
-      },
-      { command: "/lang", description: ctx.i18n.t("commands.lang") },
-      { command: "/help", description: ctx.i18n.t("commands.help") },
-    ]);
+  async replyHelp(ctx) {
+    ctx.replyWithHTML(ctx.i18n.t("help"));
   }
 
-  async switchTo(ctx, to) {
-    if (!to) {
-      ctx.reply(
-        ctx.i18n.t("selectToLangButton"),
-        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
-          .oneTime()
-          .resize()
-      );
-      return;
-    }
-    let message = `${locales[this.defaultLocale].toSet} ${
-      locales[this.defaultLocale].lang[to]
-    }`;
-    let { translation } = await this.translate(
-      ctx,
-      message,
-      this.defaultLocale,
-      to
-    );
-    if (translation) {
-      ctx.session.to = to;
-      if (this.params?.onSetTo) {
-        await this.params.onSetTo(to);
-      }
-      ctx.reply(translation, Markup.removeKeyboard());
-    } else {
-      ctx.reply(
-        `${ctx.i18n.t("unknown")} ${locales[this.defaultLocale].lang[to]}`,
-        Markup.removeKeyboard()
-      );
-    }
-  }
-
-  async switchFrom(ctx, from) {
-    if (!from) {
-      ctx.reply(
-        ctx.i18n.t("selectFromLangButton"),
-        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("from")))
-          .oneTime()
-          .resize()
-      );
-      return;
-    }
-    let message = `${locales[this.defaultLocale].fromSet} ${
-      locales[this.defaultLocale].lang[from]
-    }`;
-    let { translation } = await this.translate(
-      ctx,
-      message,
-      this.defaultLocale,
-      from
-    );
-    if (translation) {
-      ctx.session.from = from;
-      if (this.params?.onSetFrom) {
-        await this.params.onSetFrom(from);
-      }
-      ctx.reply(translation, Markup.removeKeyboard());
-    } else {
-      ctx.reply(
-        `${ctx.i18n.t("unknown")} ${locales[this.defaultLocale].lang[from]}`,
-        Markup.removeKeyboard()
-      );
-    }
-  }
-
+  /**
+   */
   init(params) {
     this.params = params;
+
     [this.defaultLocale] = Object.entries(locales).find(
       ([, value]) => value.isDefault
     );
+
     this.i18n = new TelegrafI18n({
       defaultLanguage: this.defaultLocale,
       allowMissing: false,
@@ -158,145 +70,30 @@ class TelegramBot {
 
     this.bot.start((ctx) => {
       this.setCommandsMenu(ctx);
-      ctx.reply(
+      ctx.replyWithHTML(
         ctx.i18n.t("start", {
           username: ctx.from.username,
         })
       );
+      ctx.replyWithHTML(ctx.i18n.t("help"));
     });
 
     this.bot.help((ctx) => {
       this.setCommandsMenu(ctx);
-      ctx.replyWithHTML(
-        ctx.i18n.t("help"),
-        Markup.inlineKeyboard([
-          Markup.button.callback(
-            ctx.i18n.t("selectToLangButton") +
-              (ctx.session.to ? ` (${ctx.session.to})` : ""),
-            "selectToLang"
-          ),
-          Markup.button.callback(
-            ctx.i18n.t("selectFromLangButton") +
-              (ctx.session.from ? ` (${ctx.session.from})` : ""),
-            "selectFromLang"
-          ),
-        ])
-      );
-    });
-
-    this.bot.command("to", (ctx) => {
-      let to = ctx.state.command?.splitArgs[0];
-      this.switchTo(ctx, to);
-    });
-
-    this.bot.command("from", (ctx) => {
-      let from = ctx.state.command?.splitArgs[0];
-      this.switchFrom(ctx, from);
-    });
-
-    this.bot.command("tomy", (ctx) => {
-      let to = ctx.i18n.locale();
-      this.switchTo(ctx, to);
-    });
-
-    this.bot.command("frommy", (ctx) => {
-      let from = ctx.i18n.locale();
-      this.switchFrom(ctx, from);
-    });
-
-    this.bot.command("swap", async (ctx) => {
-      let to = ctx.session.from ?? ctx.i18n.locale();
-      let from = ctx.session.to ?? ctx.i18n.locale();
-      await this.switchTo(ctx, to);
-      await this.switchFrom(ctx, from);
-    });
-
-    this.bot.command("lang", async (ctx) => {
-      ctx.reply(
-        ctx.i18n.t("selectToLangButton"),
-        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
-          .oneTime()
-          .resize()
-      );
-    });
-
-    this.bot.action("selectToLang", async (ctx) => {
-      ctx.reply(
-        ctx.i18n.t("selectToLang"),
-        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("to")))
-          .oneTime()
-          .resize()
-      );
-    });
-
-    this.bot.action("selectFromLang", async (ctx) => {
-      ctx.reply(
-        ctx.i18n.t("selectFromLang"),
-        Markup.keyboard(this.getLangMenu(ctx, ctx.i18n.t("from")))
-          .oneTime()
-          .resize()
-      );
-    });
-
-    this.bot.action(/changeFromLang (.+)/, async (ctx) => {
-      let lang = ctx.match[1];
-      this.switchFrom(ctx, lang);
-    });
-
-    this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
-      let direction = ctx.match[1];
-      let lang = ctx.match[2];
-      if (direction === ctx.i18n.t("from")) {
-        return this.switchFrom(ctx, lang);
-      }
-      return this.switchTo(ctx, lang);
-    });
-
-    this.bot.hears(/✖️ .+/, async (ctx) => {
-      ctx.reply(ctx.i18n.t("canceled"), Markup.removeKeyboard());
-    });
-
-    this.bot.hears(/(.+)/, async (ctx) => {
-      let { translation, langCorrected, textCorrected } = await this.translate(
-        ctx,
-        ctx.message.text,
-        ctx.session.from,
-        ctx.session.to
-      );
-      if (translation) {
-        await ctx.reply(translation);
-      } else {
-        await ctx.reply(ctx.i18n.t("noTranslate"));
-      }
-      if (langCorrected) {
-        await ctx.reply(
-          `${ctx.i18n.t("langCorrected")} ${ctx.i18n.t(
-            `lang.${langCorrected}`
-          )}`
-        );
-        await ctx.reply(
-          ctx.i18n.t("changeProposal"),
-          Markup.inlineKeyboard([
-            Markup.button.callback(
-              ctx.i18n.t("changeFromLangButton"),
-              `changeFromLang ${langCorrected}`
-            ),
-          ])
-        );
-      }
-      if (textCorrected) {
-        await ctx.reply(`${ctx.i18n.t("textCorrected")} ${textCorrected}`);
-      }
+      this.replyHelp(ctx);
     });
   }
 
-  startDevMode() {
+  async startDevMode() {
     console.log("Starting a bot in development mode");
 
     axios
       .get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/deleteWebhook`)
       .then(() => {
         this.bot.launch();
+      })
+      .catch((error) => {
+        console.log(error);
       });
   }
 

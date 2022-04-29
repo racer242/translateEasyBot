@@ -26,6 +26,8 @@ Here are the commands I am running:
     toSet: "👌 Now I will translate into this language:",
     fromSet: "👍 Now I will translate from this language:",
     unknown: "Language isn't supported:",
+    wrong:
+      "Pfft... 🤦‍♂️ These stupid people... What kind of language is this? You must enter the code according to ISO 639-1",
     noTranslate:
       "🤷‍♂️ I'm very embarrassed... I haven't learned this language yet:",
     selectToLangButton: "Translate to 👉",
@@ -41,6 +43,7 @@ Here are the commands I am running:
     lang: getLang("en"),
     cancel: "✖️ cancel",
     canceled: "As you wish 🤖",
+    testLanguage: "WOW! 🤟 I speak ",
     commands: {
       toLang: "Translate to native language",
       fromLang: "Translate from native language",
@@ -75,6 +78,8 @@ Here are the commands I am running:
     toSet: "👌 Теперь я буду переводить на этот язык:",
     fromSet: "👍 Теперь я буду переводить с этого языка:",
     unknown: "🤷‍♂️ Мне очень неловко... Я еще не выучил этот язык:",
+    wrong:
+      "Пфф... 🤦‍♂️ Эти несмышлёные человеки... Что это вообще за язык такой? Надо вводить код по ISO 639-1",
     noTranslate:
       "😱 Ой. Что-то с моими логическими схемами!  Я немного сломался...",
     selectToLangButton: "Переводить на 👉",
@@ -90,6 +95,7 @@ Here are the commands I am running:
     lang: getLang("ru"),
     cancel: "✖️ отменить",
     canceled: "Как пожелаешь 🤖",
+    testLanguage: "ОГО! 🤟 Я говорю по-",
     commands: {
       toLang: "Переводить на родной язык",
       fromLang: "Переводить с родного языка",
