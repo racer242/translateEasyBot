@@ -105,7 +105,10 @@ class TranslateBot extends TelegramBot {
       }
       await ctx.replyWithHTML(translation);
       await ctx.replyWithHTML(
-        `${ctx.i18n.t("toSet")} ${ctx.i18n.t(`lang.${lang}`)}`,
+        ctx.i18n.t(dir === "to" ? "toSet" : "fromSet", {
+          l: ctx.i18n.t(`lang.${lang}`),
+        }),
+        // `${ctx.i18n.t("toSet")} ${ctx.i18n.t(`lang.${lang}`)}`,
         Markup.removeKeyboard()
       );
     } else {
@@ -114,7 +117,7 @@ class TranslateBot extends TelegramBot {
       ).lang;
       if (languages[lang]) {
         ctx.replyWithHTML(
-          `${ctx.i18n.t("unknown")} ${languages[lang]}`,
+          ctx.i18n.t("unknown", { l: languages[lang] }),
           Markup.removeKeyboard()
         );
       } else {
@@ -185,6 +188,69 @@ class TranslateBot extends TelegramBot {
       this.switchLang(ctx, lang, "from");
     });
 
+    this.bot.on("sticker", (ctx) => {
+      if (ctx.update?.message?.sticker?.emoji) {
+        ctx.reply(ctx.update.message.sticker.emoji);
+      } else {
+        ctx.reply("🤷‍♂️");
+      }
+    });
+
+    this.bot.on("animation", () => {});
+    this.bot.on("document", () => {});
+    this.bot.on("audio", async (ctx) => {
+      if (ctx.update?.message?.audio) {
+        let t = ctx.update.message.audio.title ?? ctx.i18n.t("nobodyKnows");
+        let p = ctx.update.message.audio.performer ?? ctx.i18n.t("nobodyKnows");
+        let { translation: tt } = await this.translate(
+          ctx,
+          t,
+          null,
+          ctx.session.to
+        );
+        let { translation: tp } = await this.translate(
+          ctx,
+          p,
+          null,
+          ctx.session.to
+        );
+        ctx.replyWithHTML(ctx.i18n.t("onAudio", { t, p, tt, tp }));
+      } else {
+        ctx.reply("🤷‍♂️");
+      }
+    });
+    this.bot.on("contact", async (ctx) => {
+      if (ctx.update?.message?.contact) {
+        let f =
+          ctx.update.message.contact.first_name ?? ctx.i18n.t("nobodyKnows");
+        let l =
+          ctx.update.message.contact.last_name ?? ctx.i18n.t("nobodyKnows");
+        let { translation: tf } = await this.translate(
+          ctx,
+          f,
+          null,
+          ctx.session.to
+        );
+        let { translation: tl } = await this.translate(
+          ctx,
+          l,
+          null,
+          ctx.session.to
+        );
+        ctx.replyWithHTML(ctx.i18n.t("onContact", { f, l, tf, tl }));
+      } else {
+        ctx.reply("🤷‍♂️");
+      }
+    });
+    this.bot.on("dice", () => {});
+    this.bot.on("game", () => {});
+    this.bot.on("location", () => {});
+    this.bot.on("photo", () => {});
+    this.bot.on("venue", () => {});
+    this.bot.on("video", () => {});
+    this.bot.on("video_note", () => {});
+    this.bot.on("voice", () => {});
+
     this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
       let direction = ctx.match[1];
       let lang = ctx.match[2];
@@ -212,9 +278,9 @@ class TranslateBot extends TelegramBot {
       }
       if (langCorrected) {
         await ctx.replyWithHTML(
-          `${ctx.i18n.t("langCorrected")} ${ctx.i18n.t(
-            `lang.${langCorrected}`
-          )}`
+          ctx.i18n.t("langCorrected", {
+            l: ctx.i18n.t(`lang.${langCorrected}`),
+          })
         );
         await ctx.replyWithHTML(
           ctx.i18n.t("changeProposal"),

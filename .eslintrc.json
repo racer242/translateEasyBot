@@ -26,6 +26,7 @@
     "security/detect-object-injection": "off",
     "import/no-unresolved": [2, { "caseSensitive": false }],
     "prefer-const": "off",
-    "class-methods-use-this": "off"
+    "class-methods-use-this": "off",
+    "no-template-curly-in-string": "off"
   }
 }
