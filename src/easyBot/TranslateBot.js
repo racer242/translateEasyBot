@@ -196,8 +196,18 @@ class TranslateBot extends TelegramBot {
       }
     });
 
-    this.bot.on("animation", () => {});
-    this.bot.on("document", () => {});
+    const captionReply = async (ctx) => {
+      if (ctx.message?.caption) {
+        let { translation: t } = await this.translate(
+          ctx,
+          ctx.message.caption,
+          null,
+          ctx.session.to
+        );
+        ctx.replyWithHTML(ctx.i18n.t("onCaption", { t }));
+      }
+    };
+
     this.bot.on("audio", async (ctx) => {
       if (ctx.update?.message?.audio) {
         let t = ctx.update.message.audio.title ?? ctx.i18n.t("nobodyKnows");
@@ -218,6 +228,7 @@ class TranslateBot extends TelegramBot {
       } else {
         ctx.reply("🤷‍♂️");
       }
+      captionReply(ctx);
     });
     this.bot.on("contact", async (ctx) => {
       if (ctx.update?.message?.contact) {
@@ -241,15 +252,24 @@ class TranslateBot extends TelegramBot {
       } else {
         ctx.reply("🤷‍♂️");
       }
+      captionReply(ctx);
     });
-    this.bot.on("dice", () => {});
-    this.bot.on("game", () => {});
-    this.bot.on("location", () => {});
-    this.bot.on("photo", () => {});
-    this.bot.on("venue", () => {});
-    this.bot.on("video", () => {});
-    this.bot.on("video_note", () => {});
-    this.bot.on("voice", () => {});
+
+    const otherFormatsReply = async (ctx) => {
+      ctx.replyWithHTML(ctx.i18n.t("iDontKnow"));
+      captionReply(ctx);
+    };
+
+    this.bot.on("animation", otherFormatsReply);
+    this.bot.on("document", otherFormatsReply);
+    this.bot.on("dice", otherFormatsReply);
+    this.bot.on("game", otherFormatsReply);
+    this.bot.on("location", otherFormatsReply);
+    this.bot.on("photo", otherFormatsReply);
+    this.bot.on("venue", otherFormatsReply);
+    this.bot.on("video", otherFormatsReply);
+    this.bot.on("video_note", otherFormatsReply);
+    this.bot.on("voice", otherFormatsReply);
 
     this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
       let direction = ctx.match[1];

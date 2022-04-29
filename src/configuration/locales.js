@@ -13,6 +13,7 @@ I was programmed for this by my creator 👨‍💻.
 
 I can also translate stickers into emoji 🥸 - it's just out of curiosity.
 In addition, you can drop audio into the chat 🎵, I will translate the name and musician. God, what am I doing?...
+I also accept contacts - this is if you are interested to know how the name and surname are translated
 
 Here are the commands I am running:
     <code>/to     </code> ‒ you can choose the language to translate into
@@ -55,7 +56,11 @@ Here are the commands I am running:
     },
     onAudio:
       "🎶 Title <code>${t}</code> ‒ <code>${tt}</code> \n🎸 Performer <code>${p}</code> ‒ <code>${tp}</code>",
+    onContact: "🐵 First name\n${f}\n${tf}\n\n🙈 Last name\n${l }\n${tl}",
+    onCaption:
+      "☝️ By the way, a comment has been added to the attachment:\n${t}",
     nobodyKnows: "🤷‍♂️ unknown",
+    iDontKnow: "🤷‍♂️ Can't say anything about this attachment yet...",
     selectToLangButton: "Translate to 👉",
     selectFromLangButton: "Translate from 👈",
     changeFromLangButton: "✅ Transfer from it, piece of iron!",
@@ -71,6 +76,7 @@ Here are the commands I am running:
 
 Еще я умею переводить стикеры в эмоджи 🥸 ‒ это просто из любознательности.
 Кроме того, Можешь закинуть в чат 🎵 аудио, я переведу название и музыканта. Боже, 🤔 чем я занимаюсь?...
+Еще принимаю контакты ‒ это если интересно узнать как переводятся имя и фамилия
 
 <b>Вот команды, которые я исполняю</b>:
     <code>/to     </code> ‒ можешь выбрать язык на который переводить
@@ -115,7 +121,9 @@ Here are the commands I am running:
       "🎶 <b>Песня</b>\n<code>${t}</code>\n<code>${tt}</code>\n\n🎸 Исполняет\n<code>${p}</code>\n<code>${tp}</code>",
     onContact:
       "🐵 <b>Имя</b>\n<code>${f}</code>\n<code>${tf}</code>\n\n🙈 Фамилия\n<code>${l}</code>\n<code>${tl}</code>",
+    onCaption: "☝️ Кстати, к вложению добавлен комметарий:\n<code>${t}</code>",
     nobodyKnows: "🤷‍♂️ неизвестно",
+    iDontKnow: "🤷‍♂️ Пока ничего не могу сказать по поводу этого вложения...",
     selectToLangButton: "Переводить на 👉",
     selectFromLangButton: "Переводить с 👈",
     changeFromLangButton: "✅ Переводи с него, железяка!",
