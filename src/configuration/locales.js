@@ -25,6 +25,8 @@ Here are the commands I am running:
     <code>/swap   </code> ‒ I will swap languages
     <code>/lang   </code> ‒ you can see all the languages I know
 
+If I am in your group, I will respond to the three dots <code>...</code>
+
 * I'm smart 🤖 I can guess what language you want to translate the phrase from. I will inform you about it.
     `,
     toSet: "👌 Now I will translate into ${l}",
@@ -87,6 +89,8 @@ Here are the commands I am running:
     <code>/frommy </code> ‒ я буду переводить с твоего родного языка
     <code>/swap   </code> ‒ я поменяю языки местами
     <code>/lang   </code> ‒ ты можешь посмотреть все языки, которые я знаю
+
+Если я сижу в твоей группе, буду откликаться на троеточе <code>...</code>
 
 * Я умный 🤖 Я могу сам догадаться, с какого языка ты хочешь перевести фразу. Я сообщу тебе об этом.
     `,

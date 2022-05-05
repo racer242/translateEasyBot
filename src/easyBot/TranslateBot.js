@@ -256,6 +256,7 @@ class TranslateBot extends TelegramBot {
     });
 
     const otherFormatsReply = async (ctx) => {
+      if (ctx?.chat?.type === "group") return;
       ctx.replyWithHTML(ctx.i18n.t("iDontKnow"));
       captionReply(ctx);
     };
@@ -333,6 +334,7 @@ class TranslateBot extends TelegramBot {
 
     this.bot.hears(/^\.\.\./, (ctx) => {
       if (ctx?.chat?.type === "group") {
+        ctx.message.text = ctx.message.text.slice(3);
         runTranslate(ctx);
       }
     });
