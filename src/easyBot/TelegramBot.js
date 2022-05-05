@@ -3,6 +3,8 @@ import TelegrafI18n from "telegraf-i18n";
 import commandMiddleware from "telegraf-cmd-args";
 import axios from "axios";
 import fs from "fs";
+import _ from "lodash";
+
 import locales from "../configuration/locales";
 /**
  * [TelegramBot description]
@@ -53,7 +55,7 @@ class TelegramBot {
       allowMissing: false,
     });
 
-    let cloneLocales = structuredClone(locales);
+    let cloneLocales = _.cloneDeep(locales);
 
     Object.entries(cloneLocales).forEach(([key, value]) => {
       this.i18n.loadLocale(key, value);
