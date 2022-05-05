@@ -27,6 +27,7 @@
     "import/no-unresolved": [2, { "caseSensitive": false }],
     "prefer-const": "off",
     "class-methods-use-this": "off",
-    "no-template-curly-in-string": "off"
+    "no-template-curly-in-string": "off",
+    "security/detect-non-literal-regexp": "off"
   }
 }

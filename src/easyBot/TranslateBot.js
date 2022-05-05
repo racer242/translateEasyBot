@@ -271,20 +271,32 @@ class TranslateBot extends TelegramBot {
     this.bot.on("video_note", otherFormatsReply);
     this.bot.on("voice", otherFormatsReply);
 
-    this.bot.hears(/(.+) .+ \((.+)\)/, async (ctx) => {
-      let direction = ctx.match[1];
-      let lang = ctx.match[2];
-      if (direction === ctx.i18n.t("from")) {
-        return this.switchLang(ctx, lang, "from");
+    this.bot.hears(
+      new RegExp(
+        `^(${locales[this.defaultLocale].from}|${
+          locales[this.defaultLocale].to
+        }) .+ \\((.+)\\)`,
+        "ig"
+      ),
+      // /^(.+) .+ \((.+)\)/
+      async (ctx) => {
+        let direction = ctx.match[1];
+        let lang = ctx.match[2];
+        if (direction === ctx.i18n.t("from")) {
+          return this.switchLang(ctx, lang, "from");
+        }
+        if (direction === ctx.i18n.t("to")) {
+          return this.switchLang(ctx, lang, "to");
+        }
+        return false;
       }
-      return this.switchLang(ctx, lang, "to");
-    });
+    );
 
     this.bot.hears(/✖️ .+/, async (ctx) => {
       ctx.replyWithHTML(ctx.i18n.t("canceled"), Markup.removeKeyboard());
     });
 
-    this.bot.hears(/(.+)/, async (ctx) => {
+    const runTranslate = async (ctx) => {
       let { translation, langCorrected, textCorrected } = await this.translate(
         ctx,
         ctx.message.text,
@@ -317,6 +329,17 @@ class TranslateBot extends TelegramBot {
           `${ctx.i18n.t("textCorrected")} ${textCorrected}`
         );
       }
+    };
+
+    this.bot.hears(/^\.\.\./, (ctx) => {
+      if (ctx?.chat?.type === "group") {
+        runTranslate(ctx);
+      }
+    });
+
+    this.bot.hears(/(.+)/, (ctx) => {
+      if (ctx?.chat?.type === "group") return;
+      runTranslate(ctx);
     });
   }
 }
