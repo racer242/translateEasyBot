@@ -336,6 +336,8 @@ class TranslateBot extends TelegramBot {
       if (ctx?.chat?.type === "group") {
         ctx.message.text = ctx.message.text.slice(3);
         runTranslate(ctx);
+      } else {
+        runTranslate(ctx);
       }
     });
 
