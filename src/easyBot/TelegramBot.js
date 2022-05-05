@@ -61,7 +61,9 @@ class TelegramBot {
       this.i18n.loadLocale(key, value);
     });
 
-    this.bot.use(Telegraf.log());
+    if (process.env.TELEGRAM_LOG === "true") {
+      this.bot.use(Telegraf.log());
+    }
     this.bot.use(session());
     this.bot.use(this.i18n.middleware());
     this.bot.use(commandMiddleware);
@@ -86,8 +88,8 @@ class TelegramBot {
     });
   }
 
-  async startDevMode() {
-    console.log("Starting a bot in development mode");
+  async startPollMode() {
+    console.log("Starting a bot in poll mode");
 
     axios
       .get(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/deleteWebhook`)
@@ -99,8 +101,8 @@ class TelegramBot {
       });
   }
 
-  async startProdMode() {
-    console.log("Starting a bot in production mode without SSL");
+  async startHttpMode() {
+    console.log("Starting a bot in http mode");
 
     this.bot.launch({
       webhook: {
@@ -110,8 +112,8 @@ class TelegramBot {
     });
   }
 
-  async startSSLProdMode() {
-    console.log("Starting a bot in production mode with SSL");
+  async startHttpsMode() {
+    console.log("Starting a bot in https mode");
 
     const tlsOptions = {
       key: fs.readFileSync("/credentials/server-key.pem"),
@@ -119,30 +121,31 @@ class TelegramBot {
     };
 
     await this.bot.telegram.setWebhook(
-      `${process.env.SERVER_URL}:${process.env.PORT}/${process.env.SECRET_URL}`
+      `${process.env.SERVER_URL}:${process.env.PORT}/${process.env.SECRET_PATH}`
     );
 
     await this.bot.startWebhook(
-      process.env.SECRET_URL,
+      process.env.SECRET_PATH,
       tlsOptions,
       process.env.PORT
     );
   }
 
   start() {
-    if (process.env.NODE_ENV === "production") {
-      if (process.env.USE_SSL === "true") {
-        this.startSSLProdMode();
-      } else {
-        this.startProdMode();
-      }
-    } else {
-      this.startDevMode();
+    switch (process.env.MODE) {
+      case "http":
+        this.startHttpMode();
+        break;
+      case "https":
+        this.startHttpsMode();
+        break;
+      default:
+        this.startPollMode();
     }
   }
 
   webhookCallback() {
-    return this.bot.webhookCallback(process.env.PROD_SECRET_SERVER_URL);
+    return this.bot.webhookCallback(process.env.SECRET_PATH);
   }
 }
 
