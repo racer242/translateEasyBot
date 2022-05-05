@@ -108,9 +108,6 @@ class TelegramBot {
         port: process.env.PORT,
       },
     });
-
-    // const webhookStatus = await Telegram.getWebhookInfo();
-    // console.log("Webhook status", webhookStatus);
   }
 
   async startSSLProdMode() {
@@ -130,14 +127,11 @@ class TelegramBot {
       tlsOptions,
       process.env.PORT
     );
-
-    // const webhookStatus = await Telegram.getWebhookInfo();
-    // console.log("Webhook status", webhookStatus);
   }
 
   start() {
     if (process.env.NODE_ENV === "production") {
-      if (process.env.USE_SSL) {
+      if (process.env.USE_SSL === "true") {
         this.startSSLProdMode();
       } else {
         this.startProdMode();
