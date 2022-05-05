@@ -1,4 +1,4 @@
-import { Telegraf, session, Telegram } from "telegraf"; // , Extra
+import { Telegraf, session } from "telegraf"; // , Extra
 import TelegrafI18n from "telegraf-i18n";
 import commandMiddleware from "telegraf-cmd-args";
 import axios from "axios";
@@ -109,8 +109,8 @@ class TelegramBot {
       },
     });
 
-    const webhookStatus = await Telegram.getWebhookInfo();
-    console.log("Webhook status", webhookStatus);
+    // const webhookStatus = await Telegram.getWebhookInfo();
+    // console.log("Webhook status", webhookStatus);
   }
 
   async startSSLProdMode() {
@@ -131,8 +131,8 @@ class TelegramBot {
       process.env.PORT
     );
 
-    const webhookStatus = await Telegram.getWebhookInfo();
-    console.log("Webhook status", webhookStatus);
+    // const webhookStatus = await Telegram.getWebhookInfo();
+    // console.log("Webhook status", webhookStatus);
   }
 
   start() {
