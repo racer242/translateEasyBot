@@ -79,14 +79,14 @@ class TelegramBot {
       next();
     });
 
-    this.bot.start((ctx) => {
+    this.bot.start(async (ctx) => {
       this.setCommandsMenu(ctx);
-      ctx.replyWithHTML(
+      await ctx.replyWithHTML(
         ctx.i18n.t("start", {
           username: ctx.from.username,
         })
       );
-      ctx.replyWithHTML(ctx.i18n.t("help"));
+      await ctx.replyWithHTML(ctx.i18n.t("help"));
     });
 
     this.bot.help((ctx) => {
