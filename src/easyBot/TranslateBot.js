@@ -23,6 +23,10 @@ class TranslateBot extends TelegramBot {
       { command: "/to", description: ctx.i18n.t("commands.to") },
       { command: "/from", description: ctx.i18n.t("commands.from") },
       {
+        command: `/swap`,
+        description: ctx.i18n.t("commands.swap"),
+      },
+      {
         command: `/tomy`,
         description: ctx.i18n.t("commands.toLang"),
       },
@@ -30,13 +34,9 @@ class TranslateBot extends TelegramBot {
         command: `/frommy`,
         description: ctx.i18n.t("commands.fromLang"),
       },
-      {
-        command: `/swap`,
-        description: ctx.i18n.t("commands.swap"),
-      },
       { command: "/lang", description: ctx.i18n.t("commands.lang") },
-      { command: "/help", description: ctx.i18n.t("commands.help") },
       { command: "/verb", description: ctx.i18n.t("commands.verb") },
+      { command: "/help", description: ctx.i18n.t("commands.help") },
     ];
   }
 
