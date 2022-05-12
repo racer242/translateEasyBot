@@ -25,7 +25,7 @@ I also accept contacts - this is if you are interested to know how the name and 
     <code>/swap   </code> ‒ I will swap languages
     <code>/lang   </code> ‒ you can see all the languages I know
 
-<b>And there are commands for the English language</b>:
+<b>And there are commands for the English language 🇬🇧</b>:
         /verb  ‒ I'll check the verb - what if it's wrong?!
 
 If I am in your group, I will respond to the three dots <code>...</code>
@@ -74,10 +74,11 @@ If I am in your group, I will respond to the three dots <code>...</code>
     verbFound: "Yes! It's an irregular verb! 👽",
     verbNotFound: "The verb is regular! 🦾 Or I don't know something... ",
     verbForms: `Verb forms are as follows: 👇
-      <code>1. Iinfinitive: \${pr}</code>
-      <code>2. Simple Past: \${pa}</code>
+      <code>1. Infinitive:      \${pr}</code>
+      <code>2. Simple Past:     \${pa}</code>
       <code>3. Past participle: \${pf}</code>
     `,
+    wrongVerb: "You're talking nonsense. 🤦‍♂️ Enter English! 🇬🇧",
   },
   ru: {
     start: `👋 Привет! Я бот‒переводчик 🤖!
@@ -102,7 +103,7 @@ If I am in your group, I will respond to the three dots <code>...</code>
     <code>/frommy </code> ‒ я буду переводить с твоего родного языка
     <code>/lang   </code> ‒ ты можешь посмотреть все языки, которые я знаю
 
-<b>А еще есть команды для Английского языка</b>:
+<b>А еще есть команды для Английского языка 🇬🇧</b>:
     <code>/verb   </code> ‒ я проверю глагол - вдруг он неправильный?!
 
 Если я сижу в твоей группе, буду откликаться на троеточе <code>...</code>
@@ -151,10 +152,11 @@ If I am in your group, I will respond to the three dots <code>...</code>
     verbFound: "Есть! Это неправильный глагол! 👽",
     verbNotFound: "А глагол-то правильный! 🦾 Или я чего-то не знаю...",
     verbForms: `Формы у глагола получаются такие: 👇
-      <code>1. Iinfinitive:     \${pr}</code>
+      <code>1. Infinitive:      \${pr}</code>
       <code>2. Simple Past:     \${pa}</code>
       <code>3. Past participle: \${pf}</code>
     `,
+    wrongVerb: "Ты вводишь какую-то ерунду. 🤦‍♂️ Вводи английский! 🇬🇧",
   },
 };
 

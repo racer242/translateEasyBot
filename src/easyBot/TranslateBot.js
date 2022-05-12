@@ -175,6 +175,10 @@ class TranslateBot extends TelegramBot {
     });
 
     const findVerb = async (ctx, verb) => {
+      if (verb.match(/[^a-zA-Z]+/)) {
+        await ctx.replyWithHTML(ctx.i18n.t("wrongVerb"));
+        return false;
+      }
       let foundVerb = this.verbsLoader.find(verb);
       if (foundVerb) {
         await ctx.replyWithHTML(ctx.i18n.t("verbFound"));
@@ -189,6 +193,7 @@ class TranslateBot extends TelegramBot {
           })
         );
       }
+      return true;
     };
 
     this.bot.command("verb", async (ctx) => {
@@ -377,10 +382,11 @@ class TranslateBot extends TelegramBot {
       }
     });
 
-    this.bot.hears(/(.+)/, (ctx) => {
+    this.bot.hears(/(.+)/, async (ctx) => {
       if (ctx?.session?.waitForVerb) {
-        findVerb(ctx, ctx.message.text);
-        ctx.session.waitForVerb = false;
+        if (await findVerb(ctx, ctx.message.text)) {
+          ctx.session.waitForVerb = false;
+        }
       } else {
         if (ctx?.chat?.type === "group") return;
         runTranslate(ctx);
