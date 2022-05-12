@@ -1,13 +1,21 @@
 import { Markup } from "telegraf"; // , Extra
 import locales from "../configuration/locales";
 import TelegramBot from "./TelegramBot";
+import VerbsLoader from "../helpers/VerbsLoader";
+import settings from "../configuration/settings";
 /**
  * [TelegramBot description]
  *
  */
 class TranslateBot extends TelegramBot {
+  constructor() {
+    super();
+    this.verbsLoader = new VerbsLoader(settings.irregularVerbsSourcePath);
+    this.verbsLoader.load();
+  }
+
   async initCtx(ctx) {
-    ctx.session ??= { to: this.defaultLocale, from: null };
+    ctx.session ??= { to: this.defaultLocale, from: null, waitForVerb: false };
   }
 
   async getCommandsMenu(ctx) {
@@ -28,6 +36,7 @@ class TranslateBot extends TelegramBot {
       },
       { command: "/lang", description: ctx.i18n.t("commands.lang") },
       { command: "/help", description: ctx.i18n.t("commands.help") },
+      { command: "/verb", description: ctx.i18n.t("commands.verb") },
     ];
   }
 
@@ -163,6 +172,33 @@ class TranslateBot extends TelegramBot {
           .oneTime()
           .resize()
       );
+    });
+
+    const findVerb = async (ctx, verb) => {
+      let foundVerb = this.verbsLoader.find(verb);
+      if (foundVerb) {
+        await ctx.replyWithHTML(ctx.i18n.t("verbFound"));
+        await ctx.replyWithHTML(ctx.i18n.t("verbForms", foundVerb));
+      } else {
+        await ctx.replyWithHTML(ctx.i18n.t("verbNotFound"));
+        await ctx.replyWithHTML(
+          ctx.i18n.t("verbForms", {
+            pr: `${verb}`,
+            pa: `${verb}ed`,
+            pf: `${verb}ed`,
+          })
+        );
+      }
+    };
+
+    this.bot.command("verb", async (ctx) => {
+      let verb = ctx.state.command?.splitArgs[0];
+      if (verb) {
+        findVerb(ctx, verb);
+      } else {
+        ctx.replyWithHTML(ctx.i18n.t("verbNotSpecified"));
+        ctx.session.waitForVerb = true;
+      }
     });
 
     this.bot.action("selectToLang", async (ctx) => {
@@ -343,7 +379,12 @@ class TranslateBot extends TelegramBot {
 
     this.bot.hears(/(.+)/, (ctx) => {
       if (ctx?.chat?.type === "group") return;
-      runTranslate(ctx);
+      if (ctx?.session?.waitForVerb) {
+        findVerb(ctx, ctx.message.text);
+        ctx.session.waitForVerb = false;
+      } else {
+        runTranslate(ctx);
+      }
     });
   }
 }

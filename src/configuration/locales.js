@@ -15,7 +15,7 @@ I can also translate stickers into emoji 🥸 - it's just out of curiosity.
 In addition, you can drop audio into the chat 🎵, I will translate the name and musician. God, what am I doing?...
 I also accept contacts - this is if you are interested to know how the name and surname are translated
 
-Here are the commands I am running:
+<b>Here are the commands I am running</b>:
     <code>/to     </code> ‒ you can choose the language to translate into
     <code>/from   </code> ‒ you can choose the language from which to translate *
     <code>/to en  </code> ‒ I will translate into this language
@@ -24,6 +24,9 @@ Here are the commands I am running:
     <code>/frommy </code> ‒ I will translate from your native language
     <code>/swap   </code> ‒ I will swap languages
     <code>/lang   </code> ‒ you can see all the languages I know
+
+<b>And there are commands for the English language</b>:
+        /verb  ‒ I'll check the verb - what if it's wrong?!
 
 If I am in your group, I will respond to the three dots <code>...</code>
 
@@ -54,6 +57,7 @@ If I am in your group, I will respond to the three dots <code>...</code>
       from: "Select the language to translate from",
       swap: "Swap languages",
       lang: "Look at the languages I know",
+      verb: "Check English verb",
       help: "I'll help in any way I can",
     },
     onAudio:
@@ -66,6 +70,14 @@ If I am in your group, I will respond to the three dots <code>...</code>
     selectToLangButton: "Translate to 👉",
     selectFromLangButton: "Translate from 👈",
     changeFromLangButton: "✅ Transfer from it, piece of iron!",
+    verbNotSpecified: "🤷‍ Enter the verb then?! 👇",
+    verbFound: "Yes! It's an irregular verb! 👽",
+    verbNotFound: "The verb is regular! 🦾 Or I don't know something... ",
+    verbForms: `Verb forms are as follows: 👇
+      <code>1. Iinfinitive: \${pr}</code>
+      <code>2. Simple Past: \${pa}</code>
+      <code>3. Past participle: \${pf}</code>
+    `,
   },
   ru: {
     start: `👋 Привет! Я бот‒переводчик 🤖!
@@ -83,12 +95,15 @@ If I am in your group, I will respond to the three dots <code>...</code>
 <b>Вот команды, которые я исполняю</b>:
     <code>/to     </code> ‒ можешь выбрать язык на который переводить
     <code>/from   </code> ‒ можешь выбрать язык с которого переводить *
+    <code>/swap   </code> ‒ я поменяю языки местами
     <code>/to ru  </code> ‒ я буду переводить на этот язык
     <code>/from ru</code> ‒ я буду переводить с этого языка
     <code>/tomy   </code> ‒ я буду переводить на твой родной язык
     <code>/frommy </code> ‒ я буду переводить с твоего родного языка
-    <code>/swap   </code> ‒ я поменяю языки местами
     <code>/lang   </code> ‒ ты можешь посмотреть все языки, которые я знаю
+
+<b>А еще есть команды для Английского языка</b>:
+    <code>/verb   </code> ‒ я проверю глагол - вдруг он неправильный?!
 
 Если я сижу в твоей группе, буду откликаться на троеточе <code>...</code>
 
@@ -119,6 +134,7 @@ If I am in your group, I will respond to the three dots <code>...</code>
       from: "Выбери язык, с которого переводить",
       swap: "Меняю языки местами",
       lang: "Посмотри языки, которые я знаю",
+      verb: "Проверить английский глагол",
       help: "Помогу, чем смогу",
     },
     onAudio:
@@ -131,6 +147,14 @@ If I am in your group, I will respond to the three dots <code>...</code>
     selectToLangButton: "Переводить на 👉",
     selectFromLangButton: "Переводить с 👈",
     changeFromLangButton: "✅ Переводи с него, железяка!",
+    verbNotSpecified: "🤷‍ Ты глагол то введи?! 👇",
+    verbFound: "Есть! Это неправильный глагол! 👽",
+    verbNotFound: "А глагол-то правильный! 🦾 Или я чего-то не знаю...",
+    verbForms: `Формы у глагола получаются такие: 👇
+      <code>1. Iinfinitive:     \${pr}</code>
+      <code>2. Simple Past:     \${pa}</code>
+      <code>3. Past participle: \${pf}</code>
+    `,
   },
 };
 

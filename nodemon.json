@@ -1,4 +1,4 @@
 {
   "watch": ["src/*", "bin/*", ".env"],
-  "ext": "js, html, css, json"
+  "ext": "js, html, css, json, xlsx"
 }
