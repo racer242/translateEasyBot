@@ -12,9 +12,9 @@ describe("VerbsLoader", () => {
     let data = verbsLoader.parse([
       { name: "irregular verbs", data: [["1", "2", "3", "4"]] },
     ]);
-    expect(data[0].pr).toBe("1");
-    expect(data[0].pa).toBe("2");
-    expect(data[0].pf).toBe("3");
+    expect(data[0].pr[0]).toBe("1");
+    expect(data[0].pa[0]).toBe("2");
+    expect(data[0].pf[0]).toBe("3");
   });
 
   test("should not parse", async () => {
@@ -41,7 +41,7 @@ describe("VerbsLoader", () => {
 
   test("should find", async () => {
     verbsLoader.load();
-    expect(verbsLoader.find("go").pf).toBe("gone");
+    expect(verbsLoader.find("go").pf[0]).toBe("gone");
   });
 
   test("shouldn't find", async () => {
