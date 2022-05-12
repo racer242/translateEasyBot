@@ -378,11 +378,11 @@ class TranslateBot extends TelegramBot {
     });
 
     this.bot.hears(/(.+)/, (ctx) => {
-      if (ctx?.chat?.type === "group") return;
       if (ctx?.session?.waitForVerb) {
         findVerb(ctx, ctx.message.text);
         ctx.session.waitForVerb = false;
       } else {
+        if (ctx?.chat?.type === "group") return;
         runTranslate(ctx);
       }
     });
